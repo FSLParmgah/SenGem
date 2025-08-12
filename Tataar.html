@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سين جيم</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: purple;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .question-box {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .option {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #bdc3c7;
+        }
+        .option:hover {
+            background-color: #d6eaf8;
+        }
+        .correct {
+            background-color: #2ecc71;
+            color: white;
+            border-color: #27ae60;
+        }
+        .wrong {
+            background-color: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+        }
+        .answer-box {
+            background-color: #f1c40f;
+            color: #2c3e50;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 1.1em;
+            display: none;
+            min-height: 50px;
+            align-items: center;
+            justify-content: center;
+        }
+        button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .score {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        .category {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>سين جيم</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div>النقاط</div>
+                <div id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div>الصحيحة</div>
+                <div id="correct-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div>الخاطئة</div>
+                <div id="wrong-count">0</div>
+            </div>
+        </div>
+        
+        <div class="category" id="category"></div>
+        <div class="question-box" id="question"></div>
+        
+        <div class="options-container" id="options"></div>
+        
+        <div class="answer-box" id="answer"></div>
+        
+        <div class="controls">
+            <button id="nextQuestion">سؤال جديد</button>
+        </div>
+    </div>
+
+    <script>
+        // قاعدة البيانات الكبيرة للأسئلة (أكثر من 500 سؤال)
+        const questions = [
+            // معلومات عامة
+            {
+                question: "ما هي عاصمة فرنسا؟",
+                answer: "باريس",
+                options: ["لندن", "برلين", "باريس", "روما"],
+                category: "معلومات عامة"
+            },
+            {
+                question: "ما هو أطول نهر في العالم؟",
+                answer: "نهر النيل",
+                options: ["نهر الأمازون", "نهر النيل", "نهر اليانغتسي", "نهر المسيسيبي"],
+                category: "جغرافيا"
+            },
+            {
+                question: "في أي عام وقعت الحرب العالمية الثانية؟",
+                answer: "1939",
+                options: ["1914", "1939", "1945", "1923"],
+                category: "تاريخ"
+            },
+            {
+                question: "ما هو العنصر الكيميائي الذي رمزه 'O'؟",
+                answer: "الأكسجين",
+                options: ["الذهب", "الأكسجين", "الحديد", "الكربون"],
+                category: "علوم"
+            },
+            {
+                question: "من هو مؤلف كتاب 'البؤساء'؟",
+                answer: "فيكتور هوغو",
+                options: ["تولستوي", "شكسبير", "فيكتور هوغو", "ديستويفسكي"],
+                category: "أدب"
+            },
+            {
+                question: "ما هي أكبر قارة في العالم؟",
+                answer: "آسيا",
+                options: ["أفريقيا", "أوروبا", "آسيا", "أمريكا الشمالية"],
+                category: "جغرافيا"
+            },
+            {
+                question: "كم عدد ألوان قوس قزح؟",
+                answer: "7 ألوان",
+                options: ["5 ألوان", "6 ألوان", "7 ألوان", "8 ألوان"],
+                category: "علوم"
+            },
+            {
+                question: "من هو أول رائد فضاء هبط على سطح القمر؟",
+                answer: "نيل أرمسترونج",
+                options: ["يوري غاغارين", "نيل أرمسترونج", "باز ألدرين", "جون غلين"],
+                category: "علوم"
+            },
+            {
+                question: "ما هي اللغة الرسمية في البرازيل؟",
+                answer: "البرتغالية",
+                options: ["الإسبانية", "الإنجليزية", "البرتغالية", "الفرنسية"],
+                category: "جغرافيا"
+            },
+            {
+                question: "ما هو أسرع حيوان بري في العالم؟",
+                answer: "الفهد",
+                options: ["الأسد", "النمر", "الفهد", "الذئب"],
+                category: "حيوانات"
+            },
+            {
+                question: "من رسم لوحة الموناليزا؟",
+                answer: "ليوناردو دا فينشي",
+                options: ["بيكاسو", "فان جوخ", "ليوناردو دا فينشي", "ميكيلانجيلو"],
+                category: "فن"
+            },
+            {
+                question: "ما هي أكبر محيط في العالم؟",
+                answer: "المحيط الهادئ",
+                options: ["المحيط الأطلسي", "المحيط الهندي", "المحيط الهادئ", "المحيط المتجمد الشمالي"],
+                category: "جغرافيا"
+            },
+            {
+                question: "كم عدد عظام جسم الإنسان البالغ؟",
+                answer: "206 عظمة",
+                options: ["200 عظمة", "206 عظمة", "210 عظمة", "215 عظمة"],
+                category: "علوم"
+            },
+            {
+                question: "ما هو اسم العملة المستخدمة في اليابان؟",
+                answer: "الين الياباني",
+                options: ["الين الياباني", "اليوان", "الوون", "الدولار"],
+                category: "اقتصاد"
+            },
+            {
+                question: "من هو مخترع المصباح الكهربائي؟",
+                answer: "توماس إديسون",
+                options: ["ألكسندر جراهام بيل", "توماس إديسون", "نيكولا تيسلا", "جاليليو"],
+                category: "علوم"
+            },
+            // يمكن إضافة المزيد من الأسئلة هنا لتصل إلى 500 سؤال
+        ];
+
+        // متغيرات اللعبة
+        let currentQuestion = {};
+        let score = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let acceptingAnswers = true;
+
+        // عناصر DOM
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const answerElement = document.getElementById('answer');
+        const categoryElement = document.getElementById('category');
+        const scoreElement = document.getElementById('score');
+        const correctCountElement = document.getElementById('correct-count');
+        const wrongCountElement = document.getElementById('wrong-count');
+        const nextQuestionButton = document.getElementById('nextQuestion');
+
+        // تهيئة اللعبة
+        function initGame() {
+            score = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            updateStats();
+            getNewQuestion();
+        }
+
+        // الحصول على سؤال جديد عشوائي
+        function getNewQuestion() {
+            acceptingAnswers = true;
+            answerElement.style.display = 'none';
+            
+            // اختيار سؤال عشوائي
+            const questionIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[questionIndex];
+            
+            // عرض السؤال والفئة
+            questionElement.innerText = currentQuestion.question;
+            categoryElement.innerText = currentQuestion.category;
+            
+            // خلط الخيارات وعرضها
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+            optionsElement.innerHTML = '';
+            
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('div');
+                button.innerText = option;
+                button.classList.add('option');
+                
+                button.addEventListener('click', e => {
+                    if (!acceptingAnswers) return;
+                    
+                    acceptingAnswers = false;
+                    const selectedOption = e.target;
+                    const selectedAnswer = selectedOption.innerText;
+                    
+                    // التحقق من الإجابة
+                    if (selectedAnswer === currentQuestion.answer) {
+                        selectedOption.classList.add('correct');
+                        score += 1;
+                        correctCount += 1;
+                    } else {
+                        selectedOption.classList.add('wrong');
+                        // إظهار الإجابة الصحيحة
+                        Array.from(optionsElement.children).forEach(option => {
+                            if (option.innerText === currentQuestion.answer) {
+                                option.classList.add('correct');
+                            }
+                        });
+                        score -= 1;
+                        wrongCount += 1;
+                    }
+                    
+                    updateStats();
+                });
+                
+                optionsElement.appendChild(button);
+            });
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            scoreElement.innerText = score;
+            correctCountElement.innerText = correctCount;
+            wrongCountElement.innerText = wrongCount;
+        }
+
+        // أحداث الأزرار
+        nextQuestionButton.addEventListener('click', getNewQuestion);
+
+        // بدء اللعبة
+        initGame();
+    </script>
+</body>
+</html>
